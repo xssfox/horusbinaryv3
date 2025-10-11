@@ -64,6 +64,7 @@ These fields are optional, and store only a single value.
 | safeMode | `true`/`false` | Payload is currently in a safe mode state |
 | powerSave | `true`/`false` | Payload or GPS is in power saving mode |
 | gpsLock | `true`/`false` | GPS is locked / not locked |
+| customData | OCTET STRING (aka bytes) | Used to encode binary data. Won't be presented on SondeHub but will be recorded |
 
 #### Built-in Multi Value Fields
 Each of these fields can have several values. When sending multiple values, ensure that the values remain in order/index. Additional values can use the extraSensors feature.

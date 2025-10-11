@@ -94,6 +94,8 @@ Telemetry ::= SEQUENCE {
     powerSave                  [17] EXPLICIT BOOLEAN OPTIONAL,
     gpsLock                    [18] EXPLICIT BOOLEAN OPTIONAL,
 
+    -- binary data
+    customData                 [19] EXPLICIT OCTET STRING OPTIONAL,
     ...  -- this is an extension marker - it lets us add fields
 }
 END
