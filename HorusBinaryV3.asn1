@@ -1,0 +1,77 @@
+HorusBinaryV3 DEFINITIONS ::= BEGIN
+
+BitFlags ::= SEQUENCE {
+    b0 [0] EXPLICIT BOOLEAN,
+    b1 [1] EXPLICIT BOOLEAN,
+    b2 [2] EXPLICIT BOOLEAN,
+    b3 [3] EXPLICIT BOOLEAN,
+    b4 [4] EXPLICIT BOOLEAN,
+    b5 [5] EXPLICIT BOOLEAN,
+    b6 [6] EXPLICIT BOOLEAN,
+    b7 [7] EXPLICIT BOOLEAN
+}
+
+CustomFieldValues ::= CHOICE {
+        -- prefixed with horus otherwise c codegen is bad
+
+        -- allows base64 - if you were crazy enough
+        horusStr  [0] EXPLICIT IA5String (FROM("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_ +/=-.")), 
+        horusInt  [1] EXPLICIT SEQUENCE(SIZE(1..4)) OF INTEGER,
+        horusReal [2] EXPLICIT SEQUENCE(SIZE(1..4)) OF REAL,
+
+        -- we could use a bit string here, but it packs down the same so we may as well make it easier on ourselves to process
+        horusBool [3] EXPLICIT BitFlags
+}
+
+AdditionalSensorType ::= SEQUENCE {
+        -- adding a name will add 
+        -- overhead but means anyone can find out what the sensor does
+        name            [0] EXPLICIT IA5String (FROM("abcdefghijklmnopqrstuvwxyz0123456789-")^SIZE (1..20)) OPTIONAL, 
+        
+        -- values are optional as we may want to send a packet without values and only names
+        values          [1] EXPLICIT CustomFieldValues OPTIONAL
+}
+
+-- we limit to 4 additional sensor types to lower out used bits
+AdditionalSensors ::= SEQUENCE(SIZE(1..4)) OF AdditionalSensorType
+
+Telemetry ::= SEQUENCE {
+    -- required fields
+    payloadCallsign     [1] EXPLICIT IA5String (FROM("-abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")^SIZE (1..15)),
+    sequenceNumber      [2] EXPLICIT INTEGER (0..65535),
+
+    -- these are common fields that are required to transmit
+    -- however if the data is missing, transmit inf for lat/lon and timeofdayseconds -1
+    timeOfDaySeconds        [3] EXPLICIT INTEGER (-1..86400), -- seconds since
+                                                               -- 00:00 UTC - highly recommended to have time of day seconds in very transmissions
+    latitude                [4] EXPLICIT REAL (-90..90) , 
+    longitude               [5] EXPLICIT REAL (-180..180),
+
+    -- highly recommended field
+    altitudeMeters          [6] EXPLICIT INTEGER (-1000..50000), -- meters - set to -1000 if invalid
+
+    -- additional extra sensors
+    extraSensors            [7] EXPLICIT AdditionalSensors OPTIONAL,
+ 
+    -- additional fields that would be unlikely to need to be sequences
+    velocityHorizontalMetersPerSecond   [8] EXPLICIT INTEGER (0..255)    OPTIONAL, -- m/s
+    gnssSatellitesVisible               [9] EXPLICIT INTEGER (0..31)     OPTIONAL, -- note that the
+                                                  -- power mode can now be expressed in bits below
+    ascentRateCentimetersPerSecond     [10] EXPLICIT INTEGER (-32767..32767)                    OPTIONAL, -- cm/s
+    pressurekPa                        [11] EXPLICIT INTEGER (0..127)     OPTIONAL, -- kPa
+
+
+    -- additional but fairly common fields so we make them explicit
+    temperatureCelsius         [12] EXPLICIT SEQUENCE(SIZE(1..8)) OF INTEGER (-127..127)   OPTIONAL, -- C
+    humidityPercentage         [13] EXPLICIT SEQUENCE(SIZE(1..8)) OF INTEGER (0..100)     OPTIONAL, -- %
+    milliVolts                 [14] EXPLICIT SEQUENCE(SIZE(1..8)) OF INTEGER (0..16383)    OPTIONAL, -- 
+    counts                     [15] EXPLICIT SEQUENCE(SIZE(1..8)) OF INTEGER OPTIONAL,
+    
+    -- bits - these mostly came from rs41 ng                  
+    safeMode                   [16] EXPLICIT BOOLEAN OPTIONAL,
+    powerSave                  [17] EXPLICIT BOOLEAN OPTIONAL,
+    gpsLock                    [18] EXPLICIT BOOLEAN OPTIONAL,
+
+    ...  -- this is an extension marker - it lets us add fields
+}
+END
