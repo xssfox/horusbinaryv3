@@ -62,9 +62,9 @@ Telemetry ::= SEQUENCE {
     longitude               [5] EXPLICIT REAL (-180..180),
 
         -- bits - these mostly came from rs41 ng                   - set to zero if not in use
-    safeMode                   [6] EXPLICIT BOOLEAN,
-    powerSave                  [7] EXPLICIT BOOLEAN,
-    gpsLock                    [8] EXPLICIT BOOLEAN,
+    safeMode                   [6] EXPLICIT BOOLEAN OPTIONAL,
+    powerSave                  [7] EXPLICIT BOOLEAN OPTIONAL,
+    gpsLock                    [8] EXPLICIT BOOLEAN OPTIONAL,
 
     -- highly recommended field
     altitudeMeters          [9] EXPLICIT INTEGER (-1000..50000), -- meters - set to -1000 if invalid

@@ -49,10 +49,6 @@ This fields are required to be transmitted/encoded
 | latitude | -90 - 90 | The payloads current latitude - if this is not known send inf | 
 | longitude | -180..180 | The payloads current longitude - if this is not known send inf | 
 | altitudeMeters | -1000 - 50000 | If the altitude is not known, transmit -1000 |
-| - | - | - |
-| safeMode | `true`/`false` | Payload is currently in a safe mode state  (set to false if not in use) |
-| powerSave | `true`/`false` | Payload or GPS is in power saving mode (set to false if not in use)  |
-| gpsLock | `true`/`false` | GPS is locked / not locked (set to false if not in use)  |
 
 **Explanatory notes:** While timeOfDaySeconds, latitude, longitude, altitudeMeters could have been marked as optional in the ASN.1 definition, doing so would cause a bit to be used for each field. Since the majority of payloads will be sending this data making them required allows us to save some space.
 
@@ -65,6 +61,10 @@ These fields are optional, and store only a single value.
 | gnssSatellitesVisible | 0 - 31 | Number of satellites the payload can see. This figure should not roll over. |
 | pressurehPa | 0 - 1200 | Atmospheric pressure in hPa |
 | customData | OCTET STRING (aka bytes) | Used to encode binary data. Won't be presented on SondeHub but will be recorded |
+| - | - | - |
+| safeMode | `true`/`false` | Payload is currently in a safe mode state  |
+| powerSave | `true`/`false` | Payload or GPS is in power saving mode |
+| gpsLock | `true`/`false` | GPS is locked / not locked  |
 
 #### Built-in Multi Value Fields
 Each of these fields can have several values. When sending multiple values, ensure that the values remain in order/index. Additional values can use the extraSensors feature.
