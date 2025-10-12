@@ -95,23 +95,37 @@ def _(ASN1_DEF, mo):
 
 
 @app.cell(hide_code=True)
-def _(editor):
+def _(editor, mo):
+    return_value=""
     exec_data={}
     try:
-        exec(editor.value,globals=exec_data)
+        exec("data =" + editor.value,globals=exec_data)
         data = exec_data['data']
     except:
-        exec(editor.value)
+        try:
+            exec("data =" + editor.value)
+        except:
+            data = {"payloadCallsign": "VK3FUR",
+        "sequenceNumber": 1234,
+
+        "timeOfDaySeconds": 9001,
+        "latitude": 123.945893903,
+        "longitude": -23.344589499,
+        "altitudeMeters": 23000}
+            return_value="""
+    <p style="color:red;font-size:12pt">Error parsing encoding data. Ensure that you have a valid python dictonary. Will use demo data for the time being.</p>
+    """
+    mo.md(return_value)
     return (data,)
 
 
 @app.cell
-def _(asn1_editor, data, mo):
+def _(asn1_editor, data):
     import asn1tools
     HorusBinaryV3 = asn1tools.compile_string(asn1_editor.value, codec="uper")
     output = HorusBinaryV3.encode('Telemetry', data)
     print(f"{output.hex()}")
-    mo.show_code()
+
     return HorusBinaryV3, asn1tools, output
 
 
@@ -223,7 +237,6 @@ def _(HorusBinaryV3, asn1tools, builder, data, drawer, mo, parser):
     import base64
     output_64 = base64.b64encode(draw.save().encode()).decode()
     mo.accordion(items={"Click to show/hide payload layout": mo.image(src=f"data:image/svg+xml;base64,{output_64}")},lazy=False)
-
     return
 
 
