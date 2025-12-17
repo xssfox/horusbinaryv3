@@ -65,15 +65,15 @@ def _(ASN1_DEF, mo):
         "gnssSatellitesVisible": 18,
 
         "temperatureCelsius": {
-            "internal": 10,
-            "external": 20
+            "internal": 100,
+            "external": 200
         },
         "milliVolts": {
             "battery": 2300
         },
 
         "ascentRateCentimetersPerSecond": 1080,
-        "humidityPercentage": [10],
+        "humidityPercentage": 10,
 
         "extraSensors": [
             {
