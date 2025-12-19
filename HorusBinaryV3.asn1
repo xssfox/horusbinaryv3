@@ -62,35 +62,33 @@ Telemetry ::= SEQUENCE {
     longitude               [5] EXPLICIT INTEGER (-18000000..18000000),  -- fixed point, x100000
 
 
-        -- bits - these mostly came from rs41 ng                   - set to zero if not in use
-    safeMode                   [6] EXPLICIT BOOLEAN OPTIONAL,
-    powerSave                  [7] EXPLICIT BOOLEAN OPTIONAL,
-    gpsLock                    [8] EXPLICIT BOOLEAN OPTIONAL,
+    -- u-blox power save state (0=PSM not active, 1=enabled, 2=acquisition, 3=tracking, 4=power optimized tracking, 5=inactive)
+    gnssPowerSaveState      [6] EXPLICIT INTEGER (0..7) OPTIONAL,  -- set to zero if not in use
 
     -- highly recommended field
-    altitudeMeters          [9] EXPLICIT INTEGER (-1000..50000), -- meters - set to -1000 if invalid
+    altitudeMeters          [7] EXPLICIT INTEGER (-1000..50000), -- meters - set to -1000 if invalid
 
     -- additional extra sensors
-    extraSensors            [10] EXPLICIT AdditionalSensors OPTIONAL,
+    extraSensors            [8] EXPLICIT AdditionalSensors OPTIONAL,
  
     -- additional fields that would be unlikely to need to be sequences
-    velocityHorizontalKilometersPerHour   [11] EXPLICIT INTEGER (0..512)    OPTIONAL, -- km/hr
-    gnssSatellitesVisible                 [12] EXPLICIT INTEGER (0..31)     OPTIONAL, -- note that the
+    velocityHorizontalKilometersPerHour   [9] EXPLICIT INTEGER (0..512)    OPTIONAL, -- km/hr
+    gnssSatellitesVisible                 [10] EXPLICIT INTEGER (0..31)     OPTIONAL, -- note that the
                                                   -- power mode can now be expressed in bits below
-    ascentRateCentimetersPerSecond       [13] EXPLICIT INTEGER (-32767..32767)                    OPTIONAL, -- cm/s
-    pressurehPa                          [14] EXPLICIT INTEGER (0..1200)     OPTIONAL, -- hPa
+    ascentRateCentimetersPerSecond       [11] EXPLICIT INTEGER (-32767..32767)                    OPTIONAL, -- cm/s
+    pressurehPa                          [12] EXPLICIT INTEGER (0..1200)     OPTIONAL, -- hPa
 
 
     -- additional but fairly common fields so we make them explicit
-    temperatureCelsius         [15] EXPLICIT TemperatureSensors   OPTIONAL, -- C
-    humidityPercentage         [16] EXPLICIT INTEGER (0..100)     OPTIONAL, -- %
-    milliVolts                 [17] EXPLICIT MilliVoltSensors     OPTIONAL, -- 
-    counts                     [18] EXPLICIT SEQUENCE(SIZE(1..8)) OF INTEGER OPTIONAL,
+    temperatureCelsius         [13] EXPLICIT TemperatureSensors   OPTIONAL, -- C
+    humidityPercentage         [14] EXPLICIT INTEGER (0..100)     OPTIONAL, -- %
+    milliVolts                 [15] EXPLICIT MilliVoltSensors     OPTIONAL, -- 
+    counts                     [16] EXPLICIT SEQUENCE(SIZE(1..8)) OF INTEGER OPTIONAL,
     
 
 
     -- binary data
-    customData                 [19] EXPLICIT OCTET STRING OPTIONAL,
+    customData                 [17] EXPLICIT OCTET STRING OPTIONAL,
     ...  -- this is an extension marker - it lets us add fields
 }
 END
