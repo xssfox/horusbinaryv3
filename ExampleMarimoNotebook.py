@@ -82,9 +82,7 @@ def _(ASN1_DEF, mo):
             }
         ],
 
-        "safeMode": True,
-        "powerSave": True,
-        "gpsLock": True,
+        "gnssPowerSaveState": 0,
     }
     """,language="python",label="Data to encode", max_height=MAX_HEIGHT,min_height=MAX_HEIGHT)
 
