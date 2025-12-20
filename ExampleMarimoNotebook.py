@@ -82,7 +82,7 @@ def _(ASN1_DEF, mo):
             }
         ],
 
-        "gnssPowerSaveState": 0,
+        "gnssPowerSaveState": "tracking",
     }
     """,language="python",label="Data to encode", max_height=MAX_HEIGHT,min_height=MAX_HEIGHT)
 

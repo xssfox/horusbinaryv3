@@ -49,6 +49,16 @@ MilliVoltSensors ::= SEQUENCE {
     custom2   [3] EXPLICIT INTEGER (0..16383) OPTIONAL -- millivolts
 }
 
+-- u-blox power save state
+GnssPowerSaveState   ::= ENUMERATED {
+    psmNotActive  (0),
+    enabled         (1),
+    acquisition     (2),
+    tracking        (3),
+    optimised       (4),
+    inactive        (5)
+}
+
 Telemetry ::= SEQUENCE {
     -- required fields
     payloadCallsign     [1] EXPLICIT IA5String (FROM("-/abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")^SIZE (1..15)),
@@ -62,8 +72,7 @@ Telemetry ::= SEQUENCE {
     longitude               [5] EXPLICIT INTEGER (-18000000..18000000),  -- fixed point, x100000
 
 
-    -- u-blox power save state (0=PSM not active, 1=enabled, 2=acquisition, 3=tracking, 4=power optimized tracking, 5=inactive)
-    gnssPowerSaveState      [6] EXPLICIT INTEGER (0..7) OPTIONAL,  -- set to zero if not in use
+    gnssPowerSaveState      [6] EXPLICIT GnssPowerSaveState OPTIONAL,
 
     -- highly recommended field
     altitudeMeters          [7] EXPLICIT INTEGER (-1000..50000), -- meters - set to -1000 if invalid

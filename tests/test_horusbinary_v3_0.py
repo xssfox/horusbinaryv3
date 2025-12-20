@@ -7,10 +7,11 @@ import datetime
 class TestHorusBinaryV3_0(unittest.TestCase):
     def setUp(self):
         self.uper = asn1tools.compile_files("./HorusBinaryV3.asn1", codec="uper")
+        self.maxDiff = None
 
     # This tests building a payload with practically every feature
     def test_bells_and_whistles(self):
-        self.maxDiff = 4000
+        
         data = { # This is an example packet that will be way too big, but it highlights all the features
             "payloadCallsign": "abcDEF-0123abc-",
             "sequenceNumber": 65535,
@@ -29,7 +30,7 @@ class TestHorusBinaryV3_0(unittest.TestCase):
                 "custom2": 127,
                 
             },
-            "humidityPercentage":[0,100,0,100],
+            "humidityPercentage":100,
             "milliVolts": {
                 "battery": 0,
                 "solar": 16383,
@@ -37,9 +38,7 @@ class TestHorusBinaryV3_0(unittest.TestCase):
                 "custom2": 16383,
                 },
             "counts": [1,100,1000,10000,100000,1000000,1000000],
-            "safeMode": True,
-            "powerSave": False,
-            "gpsLock": True,
+            "gnssPowerSaveState": "tracking",
 
             "extraSensors": [
                 {
@@ -86,7 +85,7 @@ class TestHorusBinaryV3_0(unittest.TestCase):
                 "custom2": 127,
                 
             },
-            "humidityPercentage":[0,100,0,100],
+            "humidityPercentage":100,
             "milliVolts": {
                 "battery": 0,
                 "solar": 16383,
@@ -94,9 +93,7 @@ class TestHorusBinaryV3_0(unittest.TestCase):
                 "custom2": 16383,
                 },
             "counts": [1,100,1000,10000,100000,1000000,1000000],
-            "safeMode": True,
-            "powerSave": False,
-            "gpsLock": True,
+            "gnssPowerSaveState": "tracking",
 
             "extraSensors": [
                 {
@@ -182,9 +179,6 @@ class TestHorusBinaryV3_0(unittest.TestCase):
             "latitude": 9000000,
             "longitude": -18000000,
             "altitudeMeters": 50000,
-            "safeMode": True,
-            "powerSave":False,
-            "gpsLock": False
         }
         encoded = self.uper.encode("Telemetry",data)
         decoded = self.uper.decode("Telemetry", encoded)
@@ -196,7 +190,8 @@ class TestHorusBinaryV3_0(unittest.TestCase):
 
 
     def test_can_decode_known(self):
-        # Ensure that we can decode an older packet and nothing has changed
+        # Ensure that we can decode an older packet and nothing has changed. Once spec finialised this value shouldn't need changing
+        KNOW_PAYLOAD="7ffe9a7a0f4110020c41669e803fffea30312a8800000001e39c7cd231524418a48c5491062923152441940404040b29ae2e1042ffe83640892284ca962854b170c1c4080e255bd5cb1ab458f57316c2603207e5c91d14e3bcc26000408c19e1f756e742603207e5c91d14e3bcc26000408c19e1f756e74fffffff07ff7011f9c047ec9e0007ffe0007fff804040590080fa0089c400c061a800c3d09000c3d090021b595bdddb595bddc0"
         data = { # This is an example packet that will be way too big, but it highlights all the features
             "payloadCallsign": "abcDEF-0123abc-",
             "sequenceNumber": 65535,
@@ -215,7 +210,7 @@ class TestHorusBinaryV3_0(unittest.TestCase):
                 "custom2": 127,
                 
             },
-            "humidityPercentage":[0,100,0,100],
+            "humidityPercentage":100,
             "milliVolts": {
                 "battery": 0,
                 "solar": 16383,
@@ -223,9 +218,7 @@ class TestHorusBinaryV3_0(unittest.TestCase):
                 "custom2": 16383,
                 },
             "counts": [1,100,1000,10000,100000,1000000,1000000],
-            "safeMode": True,
-            "powerSave": False,
-            "gpsLock": True,
+            "gnssPowerSaveState": "tracking",
             "customData": b"meowmeow",
 
             "extraSensors": [
@@ -247,7 +240,12 @@ class TestHorusBinaryV3_0(unittest.TestCase):
                 }
             ],
         }
-        decoded = self.uper.decode("Telemetry", bytes.fromhex("7fffa59a738f4000420c49669c0ffffa8c0c4aa200000000b8e71f348c54910629231524418a48c549106501010102ca6b8b8410bffa0d902248a132a58a152c5c307102038956f572c6ad163d5cc5b0980c81f972474538ef309800102306787dd5b9d0980c81f972474538ef309800102306787dd5b9d3ffffffc1ffc03f803fb0190064f0003fff0003fffc020202c80407d0044e2006030d40061e8480061e848010dacadeeedacadeee"))
+        
+        # Check if the we encoded the same
+        encoded = self.uper.encode("Telemetry",data).hex()
+        self.assertEqual(KNOW_PAYLOAD, encoded)
+
+        decoded = self.uper.decode("Telemetry", bytes.fromhex(KNOW_PAYLOAD))
 
         self.assertDictEqual(data, decoded)
 
@@ -272,12 +270,10 @@ class TestHorusBinaryV3_0(unittest.TestCase):
                     "external": int(data['ext_temperature'])
                 },
                 "milliVolts": {"battery": int(data['batt']*1000)},
-                "humidityPercentage": [data['ext_humidity']],
+                "humidityPercentage": data['ext_humidity'],
                 "ascentRateCentimetersPerSecond": int(data["ascent_rate"]*100),
                 "pressurehPa": int(data['ext_pressure']),
-                "safeMode": True,
-                "powerSave":False,
-                "gpsLock": False
+                "gnssPowerSaveState": "tracking",
             }
             encoded = self.uper.encode("Telemetry",to_encode)
             if len(encoded) > max_length:

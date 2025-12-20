@@ -66,9 +66,7 @@ These fields are optional, and store only a single value.
 | pressurehPa | 0 - 1200 | Atmospheric pressure in hPa |
 | customData | OCTET STRING (aka bytes) | Used to encode binary data. Won't be presented on SondeHub but will be recorded |
 | - | - | - |
-| safeMode | `true`/`false` | Payload is currently in a safe mode state  |
-| powerSave | `true`/`false` | Payload or GPS is in power saving mode |
-| gpsLock | `true`/`false` | GPS is locked / not locked  |
+| gnssPowerSaveState | 0-5 | u-blox GNSS Power Save State |
 
 #### Built-in Multi Value Fields
 Each of these fields can have several values. When sending multiple values, ensure that the values remain in order/index. Additional values can use the extraSensors feature.
@@ -196,11 +194,7 @@ data =  {
             "name": "rad", 
             "values": ("horusInt", [1,2,3])
         }
-    ],
-
-    "safeMode": True,
-    "powerSave": True,
-    "gpsLock": True,
+    ]
 }
 
 binary_output_uper = uper.encode('Telemetry', data)
@@ -226,9 +220,7 @@ Output:
   "timeOfDaySeconds": 9001,
   "latitude": 8994589,
   "longitude": -2334458,
-  "safeMode": true,
-  "powerSave": true,
-  "gpsLock": true,
+
   "altitudeMeters": 23000,
   "extraSensors": [
     {
