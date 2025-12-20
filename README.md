@@ -62,12 +62,11 @@ These fields are optional, and store only a single value.
 | velocityHorizontalKilometersPerHour | 0-512 | Horizontal velocity in m/s|
 | ascentRateCentimetersPerSecond | -32767 - 32767 | Ascent rate in centimeters per second. Centimeters is used here to avoid using a REAL which takes up 2 bytes. |
 | gnssSatellitesVisible | 0 - 31 | Number of satellites the payload can see. This figure should not roll over. |
+| humidityPercentage | 0 - 100 | Humidity in percentage |
 | pressurehPa | 0 - 1200 | Atmospheric pressure in hPa |
 | customData | OCTET STRING (aka bytes) | Used to encode binary data. Won't be presented on SondeHub but will be recorded |
 | - | - | - |
-| safeMode | `true`/`false` | Payload is currently in a safe mode state  |
-| powerSave | `true`/`false` | Payload or GPS is in power saving mode |
-| gpsLock | `true`/`false` | GPS is locked / not locked  |
+| gnssPowerSaveState | 0-5 | u-blox GNSS Power Save State |
 
 #### Built-in Multi Value Fields
 Each of these fields can have several values. When sending multiple values, ensure that the values remain in order/index. Additional values can use the extraSensors feature.
@@ -75,11 +74,10 @@ Each of these fields can have several values. When sending multiple values, ensu
 | Field Name | Sub Field name| Constraint | Description |
 | -- | -- | -- | -- |
 | temperatureCelsius |  |  |
-| -                  | internal | -127 - 127 | Sensor temperature in Celsius |
-| -                  | external | -127 - 127 | Sensor temperature in Celsius |
-| -                  | custom1  | -127 - 127 | Sensor temperature in Celsius |
-| -                  | custom2  | -127 - 127 | Sensor temperature in Celsius |
-| humidityPercentage (max 4) | 0 - 100 | Humidity in percentage |
+| -                  | internal | -1023 - 1023 | Sensor temperature in Celsius ** value *10 ** |
+| -                  | external | -1023 - 1023 | Sensor temperature in Celsius ** value *10 ** |
+| -                  | custom1  | -1023 - 1023 | Sensor temperature in Celsius ** value *10 ** |
+| -                  | custom2  | -1023 - 1023 | Sensor temperature in Celsius ** value *10 ** |
 | milliVolts | |
 | -          | battery | 0 - 16383 | Voltage in milliVolts |
 | -          | solar | 0 - 16383 | Voltage in milliVolts |
@@ -168,34 +166,35 @@ Names of sensors don't need to sent all the time, these can be sent occasionally
 ```python
 import asn1tools
 uper = asn1tools.compile_files("./HorusBinaryV3.asn1", codec="uper")
-data = {
+data =  {
     "payloadCallsign": "VK3FUR",
     "sequenceNumber": 1234,
 
     "timeOfDaySeconds": 9001,
-    "latitude": 123.945893903,
-    "longitude": -23.344589499,
+    "latitude": 89_94589,
+    "longitude": -23_34458,
     "altitudeMeters": 23000,
-    
-    "velocityHorizontalMetersPerSecond": 200,
+
+    "velocityHorizontalKilometersPerHour": 200,
     "gnssSatellitesVisible": 18,
 
-    "temperatureCelsius": [-120, 20], # additional temperature field
-    "milliVolts": [2300],
+    "temperatureCelsius": {
+        "internal": 100,
+        "external": 200
+    },
+    "milliVolts": {
+        "battery": 2300
+    },
 
     "ascentRateCentimetersPerSecond": 1080,
-    "humidityPercentage": [10],
+    "humidityPercentage": 10,
 
     "extraSensors": [
         {
             "name": "rad", 
-            "values": ("horusInt", [1,2,3]) 
-        },
-    ],
-
-    "safeMode": True,
-    "powerSave": True,
-    "gpsLock": True,
+            "values": ("horusInt", [1,2,3])
+        }
+    ]
 }
 
 binary_output_uper = uper.encode('Telemetry', data)
@@ -204,8 +203,8 @@ print(f"bytes  uper: {len(binary_output_uper)}")
 ```
 Output:
 ```
-hex uper: 7bbac0a8883ee026908ca82603487bf2261a52deec2703442eb06e08e980057700c4e1673008080810081e44a10dc83c981408fce0
-bytes  uper: 53
+hex uper: 7f7161585460741348465512935d3bc261baee0189c2ce60101010201033225086f918e638a823f0
+bytes  uper: 40
 ```
 
 Decoding:
@@ -216,22 +215,37 @@ uper.decode('Telemetry',binary_output_uper)
 Output:
 ```
 {
- 'payloadCallsign': 'VK3FUR',
- 'sequenceNumber': 1234,
- 'timeOfDaySeconds': 9001,
- 'latitude': 123.945893903,
- 'longitude': -23.344589499,
- 'altitudeMeters': 23000,
- 'extraSensors': [{'name': 'rad', 'values': ('horusInt', [1, 2, 3])}],
- 'velocityHorizontalMetersPerSecond': 200,
- 'gnssSatellitesVisible': 18,
- 'ascentRateCentimetersPerSecond': 1080,
- 'temperatureCelsius': [-120, 20],
- 'humidityPercentage': [10],
- 'milliVolts': [2300],
- 'safeMode': True,
- 'powerSave': True,
- 'gpsLock': True
+  "payloadCallsign": "VK3FUR",
+  "sequenceNumber": 1234,
+  "timeOfDaySeconds": 9001,
+  "latitude": 8994589,
+  "longitude": -2334458,
+
+  "altitudeMeters": 23000,
+  "extraSensors": [
+    {
+      "name": "rad",
+      "values": [
+        "horusInt",
+        [
+          1,
+          2,
+          3
+        ]
+      ]
+    }
+  ],
+  "velocityHorizontalKilometersPerHour": 200,
+  "gnssSatellitesVisible": 18,
+  "ascentRateCentimetersPerSecond": 1080,
+  "temperatureCelsius": {
+    "internal": 100,
+    "external": 200
+  },
+  "humidityPercentage": 10,
+  "milliVolts": {
+    "battery": 2300
+  }
 }
 ```
 

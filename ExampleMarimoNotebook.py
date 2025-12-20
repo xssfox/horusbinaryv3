@@ -65,15 +65,15 @@ def _(ASN1_DEF, mo):
         "gnssSatellitesVisible": 18,
 
         "temperatureCelsius": {
-            "internal": 10,
-            "external": 20
+            "internal": 100,
+            "external": 200
         },
         "milliVolts": {
             "battery": 2300
         },
 
         "ascentRateCentimetersPerSecond": 1080,
-        "humidityPercentage": [10],
+        "humidityPercentage": 10,
 
         "extraSensors": [
             {
@@ -82,9 +82,7 @@ def _(ASN1_DEF, mo):
             }
         ],
 
-        "safeMode": True,
-        "powerSave": True,
-        "gpsLock": True,
+        "gnssPowerSaveState": "tracking",
     }
     """,language="python",label="Data to encode", max_height=MAX_HEIGHT,min_height=MAX_HEIGHT)
 
