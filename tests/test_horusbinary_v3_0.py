@@ -191,7 +191,7 @@ class TestHorusBinaryV3_0(unittest.TestCase):
 
     def test_can_decode_known(self):
         # Ensure that we can decode an older packet and nothing has changed. Once spec finialised this value shouldn't need changing
-        KNOW_PAYLOAD="7ffe9a7a0f4110020c41669e803fffea30312a8800000001e39c7cd231524418a48c5491062923152441940404040b29ae2e1042ffe83640892284ca962854b170c1c4080e255bd5cb1ab458f57316c2603207e5c91d14e3bcc26000408c19e1f756e742603207e5c91d14e3bcc26000408c19e1f756e74fffffff07ff7011f9c047ec9e0007ffe0007fff804040590080fa0089c400c061a800c3d09000c3d090021b595bdddb595bddc0"
+        KNOW_PAYLOAD="7ffe9a7a0f4110020c41669e803fffea30312a88000000031ce3e6918a9220c52462a488314918a9220ca0202020594d71708217ff41b20449142654b142a58b860e2040712adeae58d5a2c7ab98b61301903f2e48e8a71de61300020460cf0fbab73a1301903f2e48e8a71de61300020460cf0fbab73a7ffffff83ffb808fce023f64f0003fff0003fffc020202c80407d0044e2006030d40061e8480061e8480c21b595bdddb595bddc0"
         data = { # This is an example packet that will be way too big, but it highlights all the features
             "payloadCallsign": "abcDEF-0123abc-",
             "sequenceNumber": 65535,

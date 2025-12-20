@@ -1,57 +1,58 @@
-HorusBinaryV3 DEFINITIONS ::= BEGIN
+-- auto tags because this will be used in uper anyway where tags don't get used (order is important though)
+HorusBinaryV3 DEFINITIONS AUTOMATIC TAGS ::= BEGIN
 
 BitFlags ::= SEQUENCE {
-    b0 [0] EXPLICIT BOOLEAN,
-    b1 [1] EXPLICIT BOOLEAN,
-    b2 [2] EXPLICIT BOOLEAN,
-    b3 [3] EXPLICIT BOOLEAN,
-    b4 [4] EXPLICIT BOOLEAN,
-    b5 [5] EXPLICIT BOOLEAN,
-    b6 [6] EXPLICIT BOOLEAN,
-    b7 [7] EXPLICIT BOOLEAN
+    b0  BOOLEAN,
+    b1  BOOLEAN,
+    b2  BOOLEAN,
+    b3  BOOLEAN,
+    b4  BOOLEAN,
+    b5  BOOLEAN,
+    b6  BOOLEAN,
+    b7  BOOLEAN
 }
 
 CustomFieldValues ::= CHOICE {
         -- prefixed with horus otherwise c codegen is bad
 
-        -- allows base64 - if you were crazy enough
-        horusStr  [0] EXPLICIT IA5String (FROM("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_ +/=-.")), 
-        horusInt  [1] EXPLICIT SEQUENCE(SIZE(1..4)) OF INTEGER,
-        horusReal [2] EXPLICIT SEQUENCE(SIZE(1..4)) OF REAL,
+        -- allows base64 - if you were crazy enough, but really you should use customData instead
+        horusStr   IA5String (FROM("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_ +/=-.")), 
+        horusInt   SEQUENCE(SIZE(1..4)) OF INTEGER,
+        horusReal  SEQUENCE(SIZE(1..4)) OF REAL,
 
         -- we could use a bit string here, but it packs down the same so we may as well make it easier on ourselves to process
-        horusBool [3] EXPLICIT BitFlags
+        horusBool  BitFlags
 }
 
 AdditionalSensorType ::= SEQUENCE {
         -- adding a name will add 
         -- overhead but means anyone can find out what the sensor does
-        name            [0] EXPLICIT IA5String (FROM("abcdefghijklmnopqrstuvwxyz0123456789-")^SIZE (1..20)) OPTIONAL, 
+        name             IA5String (FROM("abcdefghijklmnopqrstuvwxyz0123456789-")^SIZE (1..20)) OPTIONAL, 
         
         -- values are optional as we may want to send a packet without values and only names
-        values          [1] EXPLICIT CustomFieldValues OPTIONAL
+        values           CustomFieldValues OPTIONAL
 }
 
 -- we limit to 4 additional sensor types to lower out used bits
 AdditionalSensors ::= SEQUENCE(SIZE(1..4)) OF AdditionalSensorType
 
 TemperatureSensors ::= SEQUENCE {
-    internal [0] EXPLICIT INTEGER (-1023..1023) OPTIONAL,  -- tenths C
-    external [1] EXPLICIT INTEGER (-1023..1023) OPTIONAL,  -- tenths C
-    custom1   [2] EXPLICIT INTEGER (-1023..1023) OPTIONAL, -- tenths C
-    custom2   [3] EXPLICIT INTEGER (-1023..1023) OPTIONAL  -- tenths C
+    internal   INTEGER (-1023..1023) OPTIONAL,  -- tenths C
+    external   INTEGER (-1023..1023) OPTIONAL,  -- tenths C
+    custom1    INTEGER (-1023..1023) OPTIONAL, -- tenths C
+    custom2    INTEGER (-1023..1023) OPTIONAL  -- tenths C
 }
 
 MilliVoltSensors ::= SEQUENCE {
-    battery  [0] EXPLICIT INTEGER (0..16383) OPTIONAL, -- millivolts
-    solar    [1] EXPLICIT INTEGER (0..16383) OPTIONAL, -- millivolts
-    custom1  [2] EXPLICIT INTEGER (0..16383) OPTIONAL, -- millivolts
-    custom2   [3] EXPLICIT INTEGER (0..16383) OPTIONAL -- millivolts
+    battery    INTEGER (0..16383) OPTIONAL, -- millivolts
+    solar      INTEGER (0..16383) OPTIONAL, -- millivolts
+    custom1    INTEGER (0..16383) OPTIONAL, -- millivolts
+    custom2    INTEGER (0..16383) OPTIONAL -- millivolts
 }
 
 -- u-blox power save state
 GnssPowerSaveState   ::= ENUMERATED {
-    psmNotActive  (0),
+    psmNotActive    (0),
     enabled         (1),
     acquisition     (2),
     tracking        (3),
@@ -61,43 +62,38 @@ GnssPowerSaveState   ::= ENUMERATED {
 
 Telemetry ::= SEQUENCE {
     -- required fields
-    payloadCallsign     [1] EXPLICIT IA5String (FROM("-/abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")^SIZE (1..15)),
-    sequenceNumber      [2] EXPLICIT INTEGER (0..65535),
+    payloadCallsign                         IA5String (FROM("-/abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")^SIZE (1..15)),
+    sequenceNumber                          INTEGER (0..65535),
 
     -- these are common fields that are required to transmit
     -- however if the data is missing, transmit 0,0 for lat/lon and timeofdayseconds -1
-    timeOfDaySeconds        [3] EXPLICIT INTEGER (-1..86400), -- seconds since
-                                                               -- 00:00 UTC - highly recommended to have time of day seconds in very transmissions
-    latitude                [4] EXPLICIT INTEGER (-9000000..9000000),    -- fixed point, x100000
-    longitude               [5] EXPLICIT INTEGER (-18000000..18000000),  -- fixed point, x100000
-
-
-    gnssPowerSaveState      [6] EXPLICIT GnssPowerSaveState OPTIONAL,
+    timeOfDaySeconds                        INTEGER (-1..86400), -- seconds since
+                                                               -- 00:00 UTC - highly recommended to have time of day seconds in every transmission
+    latitude                                INTEGER (-9000000..9000000),    -- fixed point, x100000
+    longitude                               INTEGER (-18000000..18000000),  -- fixed point, x100000
 
     -- highly recommended field
-    altitudeMeters          [7] EXPLICIT INTEGER (-1000..50000), -- meters - set to -1000 if invalid
+    altitudeMeters                          INTEGER (-1000..50000), -- meters - set to -1000 if invalid
 
     -- additional extra sensors
-    extraSensors            [8] EXPLICIT AdditionalSensors OPTIONAL,
+    extraSensors                            AdditionalSensors OPTIONAL,
  
     -- additional fields that would be unlikely to need to be sequences
-    velocityHorizontalKilometersPerHour   [9] EXPLICIT INTEGER (0..512)    OPTIONAL, -- km/hr
-    gnssSatellitesVisible                 [10] EXPLICIT INTEGER (0..31)     OPTIONAL, -- note that the
-                                                  -- power mode can now be expressed in bits below
-    ascentRateCentimetersPerSecond       [11] EXPLICIT INTEGER (-32767..32767)                    OPTIONAL, -- cm/s
-    pressurehPa                          [12] EXPLICIT INTEGER (0..1200)     OPTIONAL, -- hPa
+    velocityHorizontalKilometersPerHour     INTEGER (0..512)    OPTIONAL, -- km/hr
+    gnssSatellitesVisible                   INTEGER (0..31)     OPTIONAL, -- note that the
+    ascentRateCentimetersPerSecond          INTEGER (-32767..32767)                    OPTIONAL, -- cm/s
+    pressurehPa                             INTEGER (0..1200)     OPTIONAL, -- hPa
 
 
     -- additional but fairly common fields so we make them explicit
-    temperatureCelsius         [13] EXPLICIT TemperatureSensors   OPTIONAL, -- C
-    humidityPercentage         [14] EXPLICIT INTEGER (0..100)     OPTIONAL, -- %
-    milliVolts                 [15] EXPLICIT MilliVoltSensors     OPTIONAL, -- 
-    counts                     [16] EXPLICIT SEQUENCE(SIZE(1..8)) OF INTEGER OPTIONAL,
-    
-
+    temperatureCelsius                      TemperatureSensors   OPTIONAL, -- C
+    humidityPercentage                      INTEGER (0..100)     OPTIONAL, -- %
+    milliVolts                              MilliVoltSensors     OPTIONAL, -- 
+    counts                                  SEQUENCE(SIZE(1..8)) OF INTEGER OPTIONAL,
+    gnssPowerSaveState                      GnssPowerSaveState OPTIONAL,
 
     -- binary data
-    customData                 [17] EXPLICIT OCTET STRING OPTIONAL,
+    customData                              OCTET STRING OPTIONAL,
     ...  -- this is an extension marker - it lets us add fields
 }
 END
