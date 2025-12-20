@@ -1,7 +1,7 @@
 import marimo
 
 __generated_with = "0.16.5"
-app = marimo.App(width="medium")
+app = marimo.App(width="full", app_title="HorusBinary v3 Playground")
 
 
 @app.cell(hide_code=True)
@@ -48,7 +48,7 @@ def _(mo):
 
 @app.cell(hide_code=True)
 def _(ASN1_DEF, mo):
-    MAX_HEIGHT=400
+    MAX_HEIGHT=1000
     asn1_editor = mo.ui.code_editor(value=ASN1_DEF,language="asn1",label="HorusBinaryV3.asn1", max_height=MAX_HEIGHT,min_height=MAX_HEIGHT)
 
     editor = mo.ui.code_editor("""
